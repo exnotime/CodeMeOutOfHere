@@ -1,7 +1,7 @@
 solution "CodeMeOut"
     configurations { "Debug", "Release" }
         flags{ "Unicode", "NoPCH" }
-        libdirs { "lib" }
+        libdirs { "lib", "lib/sfml" }
         includedirs { "inc"}
         platforms{"x64" }
 
@@ -24,7 +24,7 @@ solution "CodeMeOut"
         targetdir ( "bin/" .. "/release" )
 
 
-	project "main"
+	project "Main"
         targetname "CodeMeOut"
 		debugdir ""
         defines { "AS_USE_NAMESPACE" }
@@ -34,7 +34,7 @@ solution "CodeMeOut"
 		files { "src/**"}
 		includedirs { "include", "src" }
         configuration { "Debug" }
-                links { "angelscript64d" }
+                links { "angelscript64d", "sfml-audio-d","sfml-graphics-d","sfml-main-d","sfml-system-d","sfml-window-d" }
         configuration { "Release" }
-                links { "angelscript64" }
+                links { "angelscript64", "sfml-audio","sfml-graphics","sfml-main","sfml-system","sfml-window" }
         

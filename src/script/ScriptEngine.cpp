@@ -1,5 +1,6 @@
 #include "ScriptEngine.h"
 #include "scriptstdstring/scriptstdstring.h"
+#include "scriptarray/scriptarray.h"
 #include "scriptbuilder/scriptbuilder.h"
 #include "scripthelper/scripthelper.h"
 #include <assert.h>
@@ -13,16 +14,6 @@ void MessageCallback(const asSMessageInfo *msg, void *param) {
 	else if (msg->type == asMSGTYPE_INFORMATION)
 		type = "INFO";
 	printf("%s (%d, %d) : %s : %s\n", msg->section, msg->row, msg->col, type, msg->message);
-}
-
-
-void LineCallback(asIScriptContext* ctx, int* t) {
-	static int lineCounter = 0;
-	lineCounter++;
-	int col;
-	const char* name;
-	int ln = ctx->GetLineNumber(0, &col, &name);
-	printf("LineCount: %d LineIndex: %d Column: %d StackName: %s\n", lineCounter, ln, col, name);
 }
 
 void Print(const std::string& msg) {
@@ -46,6 +37,7 @@ void ScriptEngine::Init() {
 	m_Engine = asCreateScriptEngine();
 	m_Engine->SetMessageCallback(asFUNCTION(MessageCallback), nullptr, asCALL_CDECL);
 	RegisterStdString(m_Engine);
+	RegisterScriptArray(m_Engine, true);
 	m_Engine->RegisterGlobalFunction("void print(const string &in)", asFUNCTION(Print), asCALL_CDECL);
 	m_Context = m_Engine->CreateContext();
 
@@ -122,6 +114,5 @@ void ScriptEngine::ExecuteString(const std::string& code) {
 void ScriptEngine::ExecuteModule(ScriptModule module, const std::string& entry) {
 	AngelScript::asIScriptFunction* func = module->GetFunctionByDecl(entry.c_str());
 	m_Context->Prepare(func);
-	m_Context->SetLineCallback(asFUNCTION(LineCallback), nullptr, asCALL_CDECL);
 	m_Context->Execute();
 }

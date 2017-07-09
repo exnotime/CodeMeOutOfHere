@@ -1,7 +1,14 @@
-void main(){
-	int i = 0;
-    while(i < 1000){
-        print("print");
-        i++;
-    }
+
+void main()
+{
+	Move(RIGHT);
+	Move(RIGHT);
+	Move(RIGHT);
+	Move(DOWN);
+	Sleep(5);
+	Move(RIGHT);
+	Move(DOWN);
+	Move(LEFT);
+	while(true)
+		Move(DOWN);
 }

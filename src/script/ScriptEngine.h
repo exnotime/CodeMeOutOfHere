@@ -16,6 +16,9 @@ class ScriptEngine {
 	AngelScript::asIScriptEngine* GetEngine() {
 		return m_Engine;
 	}
+	AngelScript::asIScriptContext* GetContext() {
+		return m_Context;
+	}
 	void RecompileScript(const std::string& scriptname);
 	void RecompileAllScripts();
 	void ExecuteString(const std::string& code);
