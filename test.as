@@ -1,14 +1,10 @@
 
 void main()
 {
-	Move(RIGHT);
-	Move(RIGHT);
-	Move(RIGHT);
-	Move(DOWN);
-	Sleep(5);
-	Move(RIGHT);
-	Move(DOWN);
-	Move(LEFT);
-	while(true)
+	while(true){
 		Move(DOWN);
+		Move(RIGHT);
+		Move(UP);
+		Move(LEFT);
+	}
 }

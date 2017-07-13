@@ -25,12 +25,16 @@ namespace RobotCommon {
 		switch (direction) {
 		case UP:
 			r->Move(glm::vec2(0, -1));
+			break;
 		case DOWN:
 			r->Move(glm::vec2(0, 1));
+			break;
 		case LEFT:
 			r->Move(glm::vec2(-1, 0));
+			break;
 		case RIGHT:
 			r->Move(glm::vec2(1, 0));
+			break;
 		}
 	}
 
@@ -60,7 +64,7 @@ namespace MoverRobot {
 	static void CreateEngine(Robot* r) {
 		//create script engine
 		asIScriptEngine* e = asCreateScriptEngine();
-		e->SetMessageCallback(asFUNCTION(RobotCommon::MessageCallback), nullptr, asCALL_CDECL);
+		e->SetMessageCallback(asFUNCTION(RobotCommon::MessageCallback), r, asCALL_CDECL);
 		//load interface
 		LoadInterface(e);
 		//set this robots engine to mover type

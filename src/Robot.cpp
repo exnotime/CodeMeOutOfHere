@@ -4,10 +4,11 @@
 
 #define CHECK(x) if(x < 0) return false;
 
-void LineCallBack(AngelScript::asIScriptContext* ctx, int* ud) {
+void LineCallBack(AngelScript::asIScriptContext* ctx, void* ud) {
+	Robot* r = (Robot*)ctx->GetUserData(10);
+	r->SetCurrentLine(ctx->GetLineNumber());
 	ctx->Suspend();
 }
-
 
 Robot::Robot() {
 	m_Position = glm::vec2(0);
@@ -15,7 +16,7 @@ Robot::Robot() {
 	m_ExecutionStatus = 0;
 	m_SleepCounter = 0;
 	m_Timer = 0;
-
+	m_CurrentLine = 0;
 	m_Module = nullptr;
 	m_Engine = nullptr;
 	m_ScriptContext = nullptr;
@@ -40,6 +41,15 @@ bool Robot::InsertScript(const char* code, int codeLength) {
 
 	auto func = m_Module->GetFunctionByDecl("void main()");
 	m_ScriptContext->Prepare(func);
+
+	m_Code = std::string(code);
+	//split code into lines for easier debugging
+	std::string l;
+	std::stringstream ss(m_Code);
+	while (std::getline(ss, l, '\n')) {
+		m_CodeLines.push_back(l);
+	}
+
 	return true;
 }
 
@@ -54,6 +64,7 @@ void Robot::Update(float delta) {
 		//check if the robot is sleeping
 		if (m_SleepCounter > 0) {
 			m_SleepCounter--;
+			m_Timer = 0;
 			return;
 		}
 		//run line
