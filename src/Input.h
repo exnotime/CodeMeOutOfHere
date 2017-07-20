@@ -13,8 +13,8 @@ namespace Input {
 		uint8_t  KeyStates[sf::Keyboard::KeyCount];
 	};
 
-	InputState CurrentState;
-	InputState LastState;
+	static InputState CurrentState;
+	static InputState LastState;
 	void Update();
 	void HandleEvent(sf::Event& e);
 

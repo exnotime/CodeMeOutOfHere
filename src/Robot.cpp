@@ -6,7 +6,7 @@
 
 void LineCallBack(AngelScript::asIScriptContext* ctx, void* ud) {
 	Robot* r = (Robot*)ctx->GetUserData(10);
-	r->SetCurrentLine(ctx->GetLineNumber());
+	r->SetCurrentLine(ctx->GetLineNumber() - 1);
 	ctx->Suspend();
 }
 
@@ -15,7 +15,8 @@ Robot::Robot() {
 	m_ExecutionCounter = 0;
 	m_ExecutionStatus = 0;
 	m_SleepCounter = 0;
-	m_Timer = 0;
+	m_Timer = 0.0;
+	m_InvHz = 1.0 / 4.0; // 4 hz
 	m_CurrentLine = 0;
 	m_Module = nullptr;
 	m_Engine = nullptr;
@@ -43,6 +44,7 @@ bool Robot::InsertScript(const char* code, int codeLength) {
 	m_ScriptContext->Prepare(func);
 
 	m_Code = std::string(code);
+	m_CodeLines.clear(); //clear residual code
 	//split code into lines for easier debugging
 	std::string l;
 	std::stringstream ss(m_Code);
@@ -60,16 +62,16 @@ void Robot::RemoveScript() {
 void Robot::Update(float delta) {
 	m_Timer += delta;
 	//TODO: set the time depending of the hz of the robot
-	if (m_Timer >= 1.0f) {
+	if (m_Timer >= m_InvHz) {
 		//check if the robot is sleeping
 		if (m_SleepCounter > 0) {
 			m_SleepCounter--;
-			m_Timer = 0;
+			m_Timer = 0.0;
 			return;
 		}
 		//run line
 		m_ExecutionStatus = m_ScriptContext->Execute();
-
+		//handle potential execution problems
 		if (m_ExecutionStatus != AngelScript::asEXECUTION_SUSPENDED) {
 			switch (m_ExecutionStatus) {
 			case AngelScript::asEXECUTION_ABORTED:
@@ -85,14 +87,14 @@ void Robot::Update(float delta) {
 				//TODO: show this to the player somehow like a flashin light or 
 				break;
 			case AngelScript::asEXECUTION_FINISHED:
-				//loop the script
+				//loop the script for now
 				AngelScript::asIScriptFunction* func = m_Module->GetFunctionByDecl("void main()");
 				m_ScriptContext->Prepare(func);
 				m_ScriptContext->Execute();
 				break;
 			}
 		}
-		m_Timer = 0;
+		m_Timer = 0.0;
 	}
 }
 
