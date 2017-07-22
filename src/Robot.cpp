@@ -6,7 +6,7 @@
 
 void LineCallBack(AngelScript::asIScriptContext* ctx, void* ud) {
 	Robot* r = (Robot*)ctx->GetUserData(10);
-	r->SetCurrentLine(ctx->GetLineNumber() - 1);
+	r->SetCurrentLine(ctx->GetLineNumber());
 	ctx->Suspend();
 }
 
@@ -16,8 +16,9 @@ Robot::Robot() {
 	m_ExecutionStatus = 0;
 	m_SleepCounter = 0;
 	m_Timer = 0.0;
-	m_InvHz = 1.0 / 4.0; // 4 hz
+	m_InvHz = 1.0 / 5.0;
 	m_CurrentLine = 0;
+	m_Paused = false;
 	m_Module = nullptr;
 	m_Engine = nullptr;
 	m_ScriptContext = nullptr;
@@ -62,7 +63,7 @@ void Robot::RemoveScript() {
 void Robot::Update(float delta) {
 	m_Timer += delta;
 	//TODO: set the time depending of the hz of the robot
-	if (m_Timer >= m_InvHz) {
+	if (m_Timer >= m_InvHz && !m_Paused) {
 		//check if the robot is sleeping
 		if (m_SleepCounter > 0) {
 			m_SleepCounter--;
@@ -70,38 +71,44 @@ void Robot::Update(float delta) {
 			return;
 		}
 		//run line
-		m_ExecutionStatus = m_ScriptContext->Execute();
-		//handle potential execution problems
-		if (m_ExecutionStatus != AngelScript::asEXECUTION_SUSPENDED) {
-			switch (m_ExecutionStatus) {
-			case AngelScript::asEXECUTION_ABORTED:
-				//player script aborted program
-				//TODO: Crash and end execution
-				break;
-			case AngelScript::asEXECUTION_ERROR:
-				//There is some type of error
-				//TODO: Crash and end execution
-				break;
-			case AngelScript::asEXECUTION_EXCEPTION:
-				//there has been some type of exception
-				//TODO: show this to the player somehow like a flashin light or 
-				break;
-			case AngelScript::asEXECUTION_FINISHED:
-				//loop the script for now
-				AngelScript::asIScriptFunction* func = m_Module->GetFunctionByDecl("void main()");
-				m_ScriptContext->Prepare(func);
-				m_ScriptContext->Execute();
-				break;
-			}
-		}
+		RunLine();
 		m_Timer = 0.0;
 	}
 }
 
 void Robot::Sleep(uint32_t cycles) {
-	//only allow max sleep of 10
-	if (cycles > 10)
+	//make sure we dont sleep to much and protect against negative numbers converted to uint
+	if (cycles > 10000) {
+		m_SleepCounter = 10000;
 		return;
-
+	}
+		
 	m_SleepCounter = cycles;
+}
+
+void Robot::RunLine() {
+	m_ExecutionStatus = m_ScriptContext->Execute();
+	//handle potential execution problems
+	if (m_ExecutionStatus != AngelScript::asEXECUTION_SUSPENDED) {
+		switch (m_ExecutionStatus) {
+		case AngelScript::asEXECUTION_ABORTED:
+			//player script aborted program
+			//TODO: Crash and end execution
+			break;
+		case AngelScript::asEXECUTION_ERROR:
+			//There is some type of error
+			//TODO: Crash and end execution
+			break;
+		case AngelScript::asEXECUTION_EXCEPTION:
+			//there has been some type of exception
+			//TODO: show this to the player somehow like a flashin light or 
+			break;
+		case AngelScript::asEXECUTION_FINISHED:
+			//loop the script for now
+			AngelScript::asIScriptFunction* func = m_Module->GetFunctionByDecl("void main()");
+			m_ScriptContext->Prepare(func);
+			m_ScriptContext->Execute();
+			break;
+		}
+	}
 }

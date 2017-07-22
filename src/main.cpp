@@ -62,18 +62,22 @@ int main() {
 	circle.setRadius(1.0f);
 	circle.setScale(TILE_SIZE / 2, TILE_SIZE / 2);
 
-	sf::CircleShape timerCircle;
-	timerCircle.setFillColor(sf::Color::Yellow);
-	timerCircle.setRadius(1.0f);
-	timerCircle.setScale(TILE_SIZE, TILE_SIZE);
-	timerCircle.setPosition(window.getSize().x - TILE_SIZE * 2, TILE_SIZE);
+	sf::RectangleShape outlineRect, timerRect;
+	outlineRect.setFillColor(sf::Color::Transparent);
+	outlineRect.setOutlineColor(sf::Color::Black);
+	outlineRect.setPosition(TILE_SIZE * TILE_COUNT_X + 10, window.getSize().y - 60);
+	outlineRect.setOutlineThickness(5.0f);
+	outlineRect.setSize(sf::Vector2f(400, 50));
 
+	timerRect.setSize(sf::Vector2f(10, 50));
+	timerRect.setFillColor(sf::Color::Green);
+	timerRect.setPosition(TILE_SIZE * TILE_COUNT_X + 10, window.getSize().y - 60);
 
 	Robot r;
 	MoverRobot::CreateEngine(&r);
 	LoadCode(&r, "test.as");
 
-	float timerScale = 1.0f;
+	float codeTimer = 0.0f;
 
 	while (window.isOpen()) {
 		Input::Update();
@@ -88,19 +92,29 @@ int main() {
 		}
 		//update
 		float deltaTime = timer.restart().asSeconds();
-		timerScale -= deltaTime;
-		if (timerScale <= 0.0f) {
-			timerScale = 1.0f;
-		}
-		timerCircle.setRadius(timerScale);
+
+		codeTimer += deltaTime;
+		codeTimer = mod((double)codeTimer, r.GetInvHz());
+		//reload code
 		if (Input::KeyPushed(sf::Keyboard::Key::R))
 			LoadCode(&r, "test.as");
+		//pause robot
+		if (Input::KeyPushed(sf::Keyboard::Key::T))
+			r.TogglePause();
+		//step line
+		if (Input::KeyPushed(sf::Keyboard::Key::Q))
+			r.RunLine();
+		if (Input::KeyDown(sf::Keyboard::Key::Space))
+			r.SetHz(5000.0);
+		else
+			r.SetHz(5.0);
 
+		printf("FPS: %f\n",1.0f / deltaTime);
 		//update robots
 		r.Update(deltaTime);
 
 		//draw
-		window.clear(sf::Color::Black);
+		window.clear(sf::Color::White);
 		//draw tiles
 		for (int y = 0; y < TILE_COUNT_Y; ++y) {
 			for (int x = 0; x < TILE_COUNT_X; ++x) {
@@ -111,8 +125,11 @@ int main() {
 		//draw robots
 		circle.setPosition(r.GetPos().x * TILE_SIZE, r.GetPos().y * TILE_SIZE);
 		window.draw(circle);
-		window.draw(timerCircle);
 
+		//draw timer
+		window.draw(outlineRect);
+		timerRect.setSize(sf::Vector2f((codeTimer / r.GetInvHz()) * outlineRect.getSize().x, 50));
+		window.draw(timerRect);
 		//DrawText
 		int i = 0;
 		auto& code = r.GetCode();
@@ -123,7 +140,7 @@ int main() {
 				lineText.setFillColor(sf::Color::Green);
 			}
 			else {
-				lineText.setFillColor(sf::Color::White);
+				lineText.setFillColor(sf::Color::Black);
 			}
 			window.draw(lineText);
 			i++;
