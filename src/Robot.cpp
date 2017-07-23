@@ -67,12 +67,14 @@ void Robot::Update(float delta) {
 		//check if the robot is sleeping
 		if (m_SleepCounter > 0) {
 			m_SleepCounter--;
-			m_Timer = 0.0;
+			m_Timer = glm::mod(m_Timer, m_InvHz);
 			return;
 		}
-		//run line
-		RunLine();
-		m_Timer = 0.0;
+		//calc amount of lines to execute
+		int lineCount = floor(m_Timer / m_InvHz);
+		for (int i = 0; i < lineCount;++i)
+			RunLine();
+		m_Timer = glm::mod(m_Timer, m_InvHz);
 	}
 }
 

@@ -29,6 +29,7 @@ void LoadCode(Robot* r, const char* filename) {
 
 int main() {
 	sf::RenderWindow window(sf::VideoMode(1600,900), "CodeMeOutOfHere");
+	window.setVerticalSyncEnabled(true);
 	sf::Clock timer;
 	sf::Font font;
 	glm::vec2 codeStartPos;
@@ -108,8 +109,6 @@ int main() {
 			r.SetHz(5000.0);
 		else
 			r.SetHz(5.0);
-
-		printf("FPS: %f\n",1.0f / deltaTime);
 		//update robots
 		r.Update(deltaTime);
 
