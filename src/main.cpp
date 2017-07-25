@@ -7,6 +7,7 @@
 #include "if_Robot.h"
 #include "Input.h"
 #include "script/ScriptEngine.h"
+#include "Camera.h"
 
 using namespace glm;
 
@@ -33,8 +34,16 @@ int main() {
 	sf::Clock timer;
 	sf::Font font;
 	glm::vec2 codeStartPos;
+	Camera cam;
+	cam.SetArea(glm::vec2(800,900));
+	cam.SetPostion(glm::vec2(0));
+	cam.SetViewport(glm::vec4(0, 0, 0.5f, 1.0f));
 
-	if (!font.loadFromFile("Envy Code R.ttf")) {
+	Camera codeCam;
+	codeCam.SetPostion(glm::vec2(800, 0));
+	codeCam.SetArea(glm::vec2(800, 900));
+	codeCam.SetViewport(glm::vec4(0.5f, 0, 0.5f, 1.0f));
+	if (!font.loadFromFile("Inconsolata-Regular.ttf")) {
 
 	}
 
@@ -61,7 +70,7 @@ int main() {
 	sf::CircleShape circle;
 	circle.setFillColor(sf::Color::Red);
 	circle.setRadius(1.0f);
-	circle.setScale(TILE_SIZE / 2, TILE_SIZE / 2);
+	circle.setScale(TILE_SIZE / 2 - 10, TILE_SIZE / 2 - 10);
 
 	sf::RectangleShape outlineRect, timerRect;
 	outlineRect.setFillColor(sf::Color::Transparent);
@@ -108,12 +117,18 @@ int main() {
 		if (Input::KeyDown(sf::Keyboard::Key::Space))
 			r.SetHz(5000.0);
 		else
-			r.SetHz(5.0);
+			r.SetHz(2.0);
 		//update robots
 		r.Update(deltaTime);
+		//update cameras
+		cam.Update(deltaTime);
+		codeCam.Update(deltaTime);
+
 
 		//draw
 		window.clear(sf::Color::White);
+		//draw world
+		cam.Apply(&window);
 		//draw tiles
 		for (int y = 0; y < TILE_COUNT_Y; ++y) {
 			for (int x = 0; x < TILE_COUNT_X; ++x) {
@@ -122,9 +137,11 @@ int main() {
 			}
 		}
 		//draw robots
-		circle.setPosition(r.GetPos().x * TILE_SIZE, r.GetPos().y * TILE_SIZE);
+		circle.setPosition(r.GetPos().x * TILE_SIZE + 5, r.GetPos().y * TILE_SIZE + 5);
 		window.draw(circle);
 
+		//draw code view
+		codeCam.Apply(&window);
 		//draw timer
 		window.draw(outlineRect);
 		timerRect.setSize(sf::Vector2f((codeTimer / r.GetInvHz()) * outlineRect.getSize().x, 50));

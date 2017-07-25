@@ -6,7 +6,7 @@
 
 void LineCallBack(AngelScript::asIScriptContext* ctx, void* ud) {
 	Robot* r = (Robot*)ctx->GetUserData(10);
-	r->SetCurrentLine(ctx->GetLineNumber());
+	r->SetCurrentLine(ctx->GetLineNumber() - 1);
 	ctx->Suspend();
 }
 
@@ -16,7 +16,7 @@ Robot::Robot() {
 	m_ExecutionStatus = 0;
 	m_SleepCounter = 0;
 	m_Timer = 0.0;
-	m_InvHz = 1.0 / 5.0;
+	m_InvHz = 1.0;
 	m_CurrentLine = 0;
 	m_Paused = false;
 	m_Module = nullptr;
