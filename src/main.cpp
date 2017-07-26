@@ -40,7 +40,7 @@ int main() {
 	cam.SetViewport(glm::vec4(0, 0, 0.5f, 1.0f));
 
 	Camera codeCam;
-	codeCam.SetPostion(glm::vec2(800, 0));
+	codeCam.SetPostion(glm::vec2(0, 0));
 	codeCam.SetArea(glm::vec2(800, 900));
 	codeCam.SetViewport(glm::vec4(0.5f, 0, 0.5f, 1.0f));
 	if (!font.loadFromFile("Inconsolata-Regular.ttf")) {
@@ -51,7 +51,7 @@ int main() {
 	lineText.setFont(font);
 	lineText.setCharacterSize(24);
 	lineText.setFillColor(sf::Color::White);
-	codeStartPos = glm::vec2(TILE_COUNT_X * TILE_SIZE + 10, 20);
+	codeStartPos = glm::vec2(10, 20);
 
 	sf::ConvexShape triangleShape;
 	triangleShape.setPointCount(3);
@@ -75,13 +75,13 @@ int main() {
 	sf::RectangleShape outlineRect, timerRect;
 	outlineRect.setFillColor(sf::Color::Transparent);
 	outlineRect.setOutlineColor(sf::Color::Black);
-	outlineRect.setPosition(TILE_SIZE * TILE_COUNT_X + 10, window.getSize().y - 60);
+	outlineRect.setPosition(10, window.getSize().y - 60);
 	outlineRect.setOutlineThickness(5.0f);
 	outlineRect.setSize(sf::Vector2f(400, 50));
 
 	timerRect.setSize(sf::Vector2f(10, 50));
 	timerRect.setFillColor(sf::Color::Green);
-	timerRect.setPosition(TILE_SIZE * TILE_COUNT_X + 10, window.getSize().y - 60);
+	timerRect.setPosition(10, window.getSize().y - 60);
 
 	Robot r;
 	MoverRobot::CreateEngine(&r);
@@ -118,11 +118,21 @@ int main() {
 			r.SetHz(5000.0);
 		else
 			r.SetHz(2.0);
+
+		if (Input::KeyDown(sf::Keyboard::Left))
+			cam.Move(glm::vec2(-200, 0) * deltaTime);
+		if (Input::KeyDown(sf::Keyboard::Right))
+			cam.Move(glm::vec2(200, 0) * deltaTime);
+		if (Input::KeyDown(sf::Keyboard::Down))
+			cam.Move(glm::vec2(0, 200) * deltaTime);
+		if (Input::KeyDown(sf::Keyboard::Up))
+			cam.Move(glm::vec2(0, -200) * deltaTime);
+
 		//update robots
 		r.Update(deltaTime);
 		//update cameras
-		cam.Update(deltaTime);
-		codeCam.Update(deltaTime);
+		cam.Update();
+		codeCam.Update();
 
 
 		//draw
@@ -130,8 +140,9 @@ int main() {
 		//draw world
 		cam.Apply(&window);
 		//draw tiles
-		for (int y = 0; y < TILE_COUNT_Y; ++y) {
-			for (int x = 0; x < TILE_COUNT_X; ++x) {
+		glm::ivec2 tileStart = cam.GetPosition() / glm::vec2(TILE_SIZE);
+		for (int y = tileStart.y - 1; y < tileStart.y + TILE_COUNT_Y + 1; ++y) {
+			for (int x = tileStart.x - 1; x < tileStart.x + TILE_COUNT_X + 1; ++x) {
 				tile.setPosition(sf::Vector2<float>(TILE_SIZE * x, TILE_SIZE * y));
 				window.draw(tile);
 			}

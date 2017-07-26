@@ -13,16 +13,7 @@ Camera::~Camera() {
 
 }
 
-void Camera::Update(float deltaTime) {
-	if (Input::KeyDown(sf::Keyboard::Left))
-		Move(glm::vec2(-40, 0) * deltaTime);
-	if (Input::KeyDown(sf::Keyboard::Right))
-		Move(glm::vec2(40, 0) * deltaTime);
-	if (Input::KeyDown(sf::Keyboard::Down))
-		Move(glm::vec2(0, 40) * deltaTime);
-	if (Input::KeyDown(sf::Keyboard::Up))
-		Move(glm::vec2(0, -40) * deltaTime);
-
+void Camera::Update() {
 	const glm::vec2 halfArea = m_Area * 0.5f;
 	m_view.setCenter(m_Position.x + halfArea.x, m_Position.y + halfArea.y);
 	m_view.setSize(m_Area.x, m_Area.y);
