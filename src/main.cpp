@@ -8,6 +8,7 @@
 #include "Input.h"
 #include "script/ScriptEngine.h"
 #include "Camera.h"
+#include "Map.h"
 
 using namespace glm;
 
@@ -34,18 +35,21 @@ int main() {
 	sf::Clock timer;
 	sf::Font font;
 	glm::vec2 codeStartPos;
+	Map testMap;
+
 	Camera cam;
-	cam.SetArea(glm::vec2(800,900));
+	cam.SetArea(glm::vec2(1120,900));
 	cam.SetPostion(glm::vec2(0));
-	cam.SetViewport(glm::vec4(0, 0, 0.5f, 1.0f));
+	cam.SetViewport(glm::vec4(0, 0, 0.7f, 1.0f));
 
 	Camera codeCam;
 	codeCam.SetPostion(glm::vec2(0, 0));
-	codeCam.SetArea(glm::vec2(800, 900));
-	codeCam.SetViewport(glm::vec4(0.5f, 0, 0.5f, 1.0f));
-	if (!font.loadFromFile("Inconsolata-Regular.ttf")) {
+	codeCam.SetArea(glm::vec2(480, 900));
+	codeCam.SetViewport(glm::vec4(0.7f, 0, 0.3f, 1.0f));
 
-	}
+	if (!font.loadFromFile("Inconsolata-Regular.ttf")) {}
+
+	testMap.Load("testmap.png");
 
 	sf::Text lineText;
 	lineText.setFont(font);
@@ -129,7 +133,7 @@ int main() {
 			cam.Move(glm::vec2(0, -200) * deltaTime);
 
 		//update robots
-		r.Update(deltaTime);
+		r.Update(deltaTime, &testMap);
 		//update cameras
 		cam.Update();
 		codeCam.Update();
@@ -143,6 +147,12 @@ int main() {
 		glm::ivec2 tileStart = cam.GetPosition() / glm::vec2(TILE_SIZE);
 		for (int y = tileStart.y - 1; y < tileStart.y + TILE_COUNT_Y + 1; ++y) {
 			for (int x = tileStart.x - 1; x < tileStart.x + TILE_COUNT_X + 1; ++x) {
+				if (testMap.GetTileType(glm::ivec2(x, y)) == BLOCKED) {
+					tile.setFillColor(sf::Color::Red);
+				}
+				else {
+					tile.setFillColor(sf::Color::Blue);
+				}
 				tile.setPosition(sf::Vector2<float>(TILE_SIZE * x, TILE_SIZE * y));
 				window.draw(tile);
 			}

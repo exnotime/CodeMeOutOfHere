@@ -3,13 +3,15 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
+#include "Map.h"
+
 class Robot {
 public:
 	Robot();
 	~Robot();
 	bool InsertScript(const char* code, int codeLength);
 	void RemoveScript();
-	void Update(float delta);
+	void Update(float delta, Map* m);
 	void Sleep(uint32_t cycles);
 	void RunLine();
 
@@ -22,7 +24,7 @@ public:
 	double GetInvHz() { return m_InvHz; }
 
 	//setters, movers and togglers
-	void Move(const glm::vec2& v) { m_Position += v; }
+	void Move(const glm::vec2& v) { m_Movement += v; }
 	void SetEngine(AngelScript::asIScriptEngine* e) { m_Engine = e; }
 	void SetCurrentLine(uint32_t l) { m_CurrentLine = l; }
 	void TogglePause() { m_Paused = !m_Paused; }
@@ -31,6 +33,7 @@ public:
 
 private:
 	glm::vec2 m_Position;
+	glm::vec2 m_Movement;
 	uint32_t m_ExecutionCounter;
 	uint32_t m_SleepCounter;
 	double m_Timer;

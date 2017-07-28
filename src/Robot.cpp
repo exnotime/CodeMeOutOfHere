@@ -60,7 +60,7 @@ void Robot::RemoveScript() {
 	if (m_Module) m_Module->Discard();
 }
 
-void Robot::Update(float delta) {
+void Robot::Update(float delta, Map* m) {
 	m_Timer += delta;
 	//TODO: set the time depending of the hz of the robot
 	if (m_Timer >= m_InvHz && !m_Paused) {
@@ -75,6 +75,11 @@ void Robot::Update(float delta) {
 		for (int i = 0; i < lineCount;++i)
 			RunLine();
 		m_Timer = glm::mod(m_Timer, m_InvHz);
+		//move if allowed
+		if (m->IsFree(glm::vec2(m_Position + m_Movement)))
+			m_Position += m_Movement;
+
+		m_Movement = glm::vec2(0);
 	}
 }
 
